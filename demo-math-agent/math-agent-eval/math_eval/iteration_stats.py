@@ -103,6 +103,76 @@ def per_iteration_failure_counts(series: list[CaseIterationSeries]) -> dict[int,
     return counts
 
 
+@dataclass
+class ConversationTurnSeries:
+    base_case_id: str
+    iteration: int
+    # score.value at each turn (iteration != -1) this one conversation
+    # actually ran, ordered by turn index (0-based, matching how turns are
+    # already labeled elsewhere — unlike the 1-indexed-for-display outer
+    # iterations). Excludes system-failure conversations entirely — see
+    # build_turn_series.
+    turn_scores: list[float]
+
+
+def build_turn_series(case_results) -> list[ConversationTurnSeries]:
+    """One series per (question, iteration) conversation, built from its
+    turn rows (iteration != -1) — NOT the FINAL summary row.
+
+    System-failure conversations are dropped entirely, the same policy as
+    `build_case_series`: a broken backend/judge call isn't a quality
+    signal, and averaging its 0.0 in would misrepresent every turn depth
+    it touches.
+    """
+    by_conv: dict[tuple[str, int], list[tuple[int, float]]] = {}
+    failed_convs: set[tuple[str, int]] = set()
+
+    for cr in case_results:
+        if cr.iteration == -1:
+            continue
+        base_id, iter_index = _split_case_id(cr.case_id)
+        key = (base_id, iter_index)
+        by_conv.setdefault(key, []).append((cr.iteration, cr.score.value))
+        if SYSTEM_FAILURE_PREFIX in cr.score.reasoning:
+            failed_convs.add(key)
+
+    return [
+        ConversationTurnSeries(
+            base_case_id=base_id,
+            iteration=iter_index,
+            turn_scores=[v for _, v in sorted(turns)],
+        )
+        for (base_id, iter_index), turns in sorted(by_conv.items())
+        if (base_id, iter_index) not in failed_convs
+    ]
+
+
+def per_turn_averages(turn_series: list[ConversationTurnSeries]) -> dict[int, float]:
+    """Average score at each turn depth (0, 1, 2, ...), across every
+    non-failed conversation, forward-filling conversations that converged
+    (or hit max_turns) before reaching that depth with their own last
+    real turn's score.
+
+    Forward-fill is deliberate, not an approximation: without it, "turn 2
+    average" would only average over conversations that actually needed a
+    third attempt — an ever-shrinking, retry-biased subset. That would
+    trend the average *down* as depth increases for the wrong reason (only
+    the hard cases are still being counted), not because later turns are
+    genuinely worse. Forward-filling means every conversation contributes
+    to every depth, holding its resolved value once it's done — same
+    reasoning `overall_average_score` uses for "last iteration is
+    representative," one level down.
+    """
+    series = [s.turn_scores for s in turn_series if s.turn_scores]
+    if not series:
+        return {}
+
+    max_depth = max(len(s) for s in series)
+    padded = [s + [s[-1]] * (max_depth - len(s)) for s in series]
+
+    return {i: sum(p[i] for p in padded) / len(padded) for i in range(max_depth)}
+
+
 def overall_average_score(series: list[CaseIterationSeries]) -> float | None:
     """Mean of each case's LAST recorded iteration's score, over cases that
     never hit a system failure at any iteration. A case that failed even

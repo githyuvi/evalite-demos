@@ -135,12 +135,19 @@ th {
 
 .overview-row {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1.4fr 1.4fr 1fr;
   gap: 1.25rem;
   margin-bottom: 1rem;
 }
 
-#iter-avg-table {
+@media (max-width: 60rem) {
+  .overview-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+#iter-avg-table,
+#turn-avg-table {
   font-size: 0.85rem;
 }
 
@@ -362,13 +369,19 @@ th {
   padding-left: 0.75rem;
 }
 
+.turn-label-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
 .turn-label {
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.02em;
   color: #71717a;
-  margin-bottom: 0.25rem;
 }
 
 .turn-io {

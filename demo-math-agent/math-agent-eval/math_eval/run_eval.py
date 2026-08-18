@@ -18,9 +18,11 @@ from .agent_adapter import MathSolverDemoAdapter
 from .build_test_cases import build_test_cases
 from .iteration_stats import (
     build_case_series,
+    build_turn_series,
     overall_average_score,
     per_iteration_averages,
     per_iteration_failure_counts,
+    per_turn_averages,
 )
 from .llm_provider import get_judge_provider
 
@@ -85,6 +87,17 @@ async def main() -> None:
         )
     else:
         print("\nOverall average score: n/a (every case hit a system failure)")
+
+    turn_series = build_turn_series(result.case_results)
+    turn_avgs = per_turn_averages(turn_series)
+
+    print(
+        "\nPer-turn average score (conversations that converged/stopped "
+        "before a given turn contribute their last real turn's score at "
+        "that depth — see iteration_stats.py's per_turn_averages docstring):"
+    )
+    for t in sorted(turn_avgs):
+        print(f"  turn {t}: {turn_avgs[t]:.3f}")
 
 
 if __name__ == "__main__":

@@ -15,9 +15,11 @@ import re
 from math_eval.constants import SYSTEM_FAILURE_PREFIX
 from math_eval.iteration_stats import (
     build_case_series,
+    build_turn_series,
     overall_average_score,
     per_iteration_averages,
     per_iteration_failure_counts,
+    per_turn_averages,
 )
 from math_eval.questions import QUESTIONS
 
@@ -88,6 +90,14 @@ def build_overview(case_results, threshold: float) -> dict:
     per_iter_fail = per_iteration_failure_counts(series)
     overall = overall_average_score(series)
 
+    # Turn depth (0, 1, 2, ...) is a different axis from iteration (1, 2, 3
+    # above): iterations are independent repeats of a question, turns are
+    # retries *within* one of those repeats. Kept 0-indexed here, matching
+    # how individual turns are already labeled elsewhere ("Turn 0", "Turn
+    # 1", ...), unlike the 1-indexed-for-display iterations.
+    turn_series = build_turn_series(case_results)
+    turn_avg = per_turn_averages(turn_series)
+
     return {
         "total_cases": total,
         "failed_cases": failed,
@@ -100,6 +110,7 @@ def build_overview(case_results, threshold: float) -> dict:
         "per_iteration_failure_counts": {
             str(i + 1): v for i, v in sorted(per_iter_fail.items())
         },
+        "per_turn_average": {str(t): v for t, v in sorted(turn_avg.items())},
         "overall_average_score": overall,
         "score_formula": SCORE_FORMULA_DESCRIPTION,
     }
@@ -126,7 +137,13 @@ def build_case_detail(case_results) -> list[dict]:
                     "iteration": iter_idx,
                     "system_failure": is_failure,
                     "turns": [
-                        {"turn": t.iteration, "input": t.input, "output": t.actual}
+                        {
+                            "turn": t.iteration,
+                            "input": t.input,
+                            "output": t.actual,
+                            "score": t.score.value,
+                            "passed": t.passed,
+                        }
                         for t in turns
                     ],
                     "final_score": final.score.value if final else None,

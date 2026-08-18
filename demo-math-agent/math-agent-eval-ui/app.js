@@ -10,6 +10,7 @@ const statFailed = document.getElementById("stat-failed");
 const statAbove = document.getElementById("stat-above");
 const statBelow = document.getElementById("stat-below");
 const iterAvgBody = document.getElementById("iter-avg-body");
+const turnAvgBody = document.getElementById("turn-avg-body");
 const overallScoreEl = document.getElementById("overall-score");
 const scoreFormulaEl = document.getElementById("score-formula");
 const thresholdInput = document.getElementById("threshold-input");
@@ -101,6 +102,21 @@ function renderOverview(overview) {
     iterAvgBody.innerHTML = `<tr><td colspan="3">No iteration data.</td></tr>`;
   }
 
+  turnAvgBody.innerHTML = "";
+  const turnKeys = Object.keys(overview.per_turn_average).sort((a, b) => Number(a) - Number(b));
+  for (const key of turnKeys) {
+    const avg = overview.per_turn_average[key];
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>turn ${key}</td>
+      <td class="iter-avg-value">${avg.toFixed(3)}</td>
+    `;
+    turnAvgBody.appendChild(tr);
+  }
+  if (turnKeys.length === 0) {
+    turnAvgBody.innerHTML = `<tr><td colspan="2">No turn data.</td></tr>`;
+  }
+
   overallScoreEl.textContent =
     overview.overall_average_score === null ? "n/a" : overview.overall_average_score.toFixed(3);
   scoreFormulaEl.textContent = overview.score_formula;
@@ -108,7 +124,12 @@ function renderOverview(overview) {
 
 function renderTurn(turn) {
   const block = el("div", { className: "turn-block" });
-  block.appendChild(el("div", { className: "turn-label", text: `Turn ${turn.turn}` }));
+  const labelRow = el("div", { className: "turn-label-row" });
+  labelRow.appendChild(el("span", { className: "turn-label", text: `Turn ${turn.turn}` }));
+  if (turn.score !== undefined && turn.passed !== undefined) {
+    labelRow.appendChild(scoreBadge(turn.score, turn.passed));
+  }
+  block.appendChild(labelRow);
 
   const inputRow = el("div", { className: "turn-io" });
   inputRow.appendChild(el("div", { className: "turn-io-label", text: "Input" }));

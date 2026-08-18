@@ -64,6 +64,19 @@
                 <tbody id="iter-avg-body"></tbody>
               </table>
             </div>
+            <div class="overview-col">
+              <h3>Average score per turn</h3>
+              <p class="hint">
+                Turn depth within a single iteration (retries after a wrong
+                or poorly-justified attempt). Conversations that converged
+                before reaching a given turn contribute their last real
+                turn's score at that depth, so every conversation counts at
+                every depth.
+              </p>
+              <table id="turn-avg-table">
+                <tbody id="turn-avg-body"></tbody>
+              </table>
+            </div>
             <div class="overview-col overview-col--summary">
               <h3>Overall average score</h3>
               <div class="big-score" id="overall-score">–</div>
