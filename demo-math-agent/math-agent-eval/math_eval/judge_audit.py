@@ -3,10 +3,9 @@
 `step_validator.validate_steps` and `answer_extraction`'s LLM fallback only
 persist their *parsed* result into `Score`/`CaseResult` — the raw completion
 text is otherwise discarded, which makes it impossible to audit *why* the
-judge produced a given verdict after the fact (gap #4 in
-GAPS_AND_IMPROVEMENTS.md). This module writes one JSON line per judge call
-to `JUDGE_AUDIT_LOG_PATH` (default `judge_audit.jsonl`) so raw completions
-survive the run.
+judge produced a given verdict after the fact. This module writes one JSON
+line per judge call to `JUDGE_AUDIT_LOG_PATH` (default `judge_audit.jsonl`)
+so raw completions survive the run.
 
 Best-effort only: a logging failure must never break the eval run itself
 (same principle as `retry.py`/`agent_adapter.py` — infrastructure around

@@ -1,4 +1,4 @@
-"""Cross-iteration aggregation (gap #7 in GAPS_AND_IMPROVEMENTS.md).
+"""Cross-iteration aggregation.
 
 `iterations=N` in build_test_cases.py repeats each question's whole
 conversation N times independently, simulating how a real user would

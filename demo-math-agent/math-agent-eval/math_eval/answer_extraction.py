@@ -6,8 +6,7 @@ any agent that deviates from the exact convention — "Final Answer:",
 markdown-bolded "**Answer:**", or an answer that only ever appears inside a
 LaTeX `\\boxed{...}` (which is how math-gpt.org's own agent formats output —
 see the sibling demo's API.md) — would silently score as "unanswered" even
-when the agent solved the problem correctly (gap #1/#9 in
-GAPS_AND_IMPROVEMENTS.md).
+when the agent solved the problem correctly.
 
 `extract_answer` now runs a cascade of strategies, cheapest first, each only
 attempted if the previous one failed to produce something the expected

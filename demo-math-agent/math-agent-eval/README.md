@@ -8,10 +8,6 @@ Test questions are two-per-section, transcribed from the official answer
 key `math-solver-agent/2025_1_English.pdf` (JEE Advanced 2025, Paper 1,
 Mathematics), chosen to cover every marking-scheme shape in that paper.
 
-See [`flow-diagram.md`](flow-diagram.md) for a color-coded diagram of the
-whole run, marking exactly which parts are evalite framework code versus
-this project's own Protocol implementations.
-
 ## Setup
 
 ```bash

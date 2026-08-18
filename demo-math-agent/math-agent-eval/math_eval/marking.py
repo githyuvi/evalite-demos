@@ -42,7 +42,7 @@ SECTION_RUBRIC: dict[int, dict] = {
 # the lookup below still fails loudly rather than silently defaulting to 0
 # if a question's answer_spec ever falls outside what this table covers —
 # a wrong/missing entry should be a build-time authoring bug, not a
-# silent mis-score (gap #10 in GAPS_AND_IMPROVEMENTS.md).
+# silent mis-score.
 _MULTI_PARTIAL_CREDIT = {
     4: {3: 3.0, 2: 2.0, 1: 1.0},
     3: {2: 2.0, 1: 1.0},
